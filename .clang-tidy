@@ -1,0 +1,13 @@
+---
+#Checks: '-*,clang-diagnostic-*,clang-analyzer-*,cppcoreguidelines-*,modernize-*,performance-*,portability-*,readability-*'
+Checks: >
+  -*,
+  cppcoreguidelines-*,
+  modernize-*,
+  portability-*,
+  performance-*,
+  readability-*,-readability-redundant-access-specifiers,-readability-convert-member-functions-to-static,-readability-qualified-auto
+WarningsAsErrors: ''
+HeaderFilterRegex: ''
+CheckOptions:
+  readability-braces-around-statements.ShortStatementLines: 3
