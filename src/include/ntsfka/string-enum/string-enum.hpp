@@ -9,11 +9,17 @@
 /* ************************************************************************ */
 
 // C++
+#include <algorithm>
+#include <array>
 #include <format>
 #include <optional>
 #include <stdexcept>
 #include <string_view>
 #include <type_traits>
+
+#ifdef __cpp_impl_reflection
+#include <meta>
+#endif
 
 /* ************************************************************************ */
 
@@ -30,6 +36,136 @@ inline constexpr struct tag_default_t {} tag_default;
 
 /* ************************************************************************ */
 
+#ifdef __cpp_impl_reflection
+
+/* ************************************************************************ */
+
+/**
+ * Annotation for generating convertor for enum and given tag.
+ *
+ * @tparam TAG The tag type the generate code for.
+ */
+template<typename TAG = tag_default_t>
+struct generate_t
+{
+};
+
+/* ************************************************************************ */
+
+/**
+ * Annotation for generating convertor for enum and given tag.
+ *
+ * @tparam TAG The tag type the generate code for.
+ */
+template<auto TAG = tag_default>
+inline constexpr generate_t<std::remove_cvref_t<decltype(TAG)>> generate = {};
+
+/* ************************************************************************ */
+
+/**
+ * Return if the enum has generate annotation.
+ *
+ * @tparam ENUM The tested enum.
+ * @tparam TAG The tag type the generate code for.
+ *
+ * @return Annotation exists.
+ */
+template<typename ENUM, typename TAG = tag_default_t>
+consteval auto has_generate() -> bool
+{
+    return !std::meta::annotations_of_with_type(^^ENUM, ^^generate_t<TAG>).empty();
+}
+
+/* ************************************************************************ */
+
+/**
+ * Annotation that defines enumeration value for specified tag.
+ *
+ * @tparam N Length of the value
+ * @tparam TAG The tag type the generate value for.
+ */
+template<std::size_t N, typename TAG = tag_default_t>
+class enum_value
+{
+public:
+    // Ctors & Dtors
+
+    explicit consteval enum_value(const char (&str)[N], [[maybe_unused]] const TAG tag = tag_default) noexcept
+    {
+        std::ranges::copy(str, value.begin());
+    }
+
+public:
+    // Accessors
+
+    /**
+     * Return stored value as string_view.
+     */
+    [[nodiscard]]
+    consteval auto str() const noexcept -> std::string_view
+    {
+        return {value.data(), N - 1};
+    }
+
+public:
+    // Data Members (must be public for structural type)
+
+    std::array<char, N> value;
+};
+
+/* ************************************************************************ */
+
+/**
+ * Extract enumeration value from annotation. If no annotation is found, returns the enumerator name.
+ *
+ * @tparam ENUMERATOR enumerator reflection info
+ * @tparam TAG The tag type the value return for.
+ *
+ * @return The enumeration value
+ */
+template<std::meta::info ENUMERATOR, typename TAG = tag_default_t>
+[[nodiscard]]
+consteval auto get_enumeration_value() -> std::string_view
+{
+    constexpr auto enumerator = ENUMERATOR;
+
+    static_assert(std::meta::is_enumerator(enumerator));
+
+    static constexpr auto annotations = std::define_static_array(std::meta::annotations_of(enumerator));
+
+    // Foreach annotations manually, ranges filter cannot be used because lambda is not usable in consteval because
+    // the argument is not constexpr
+    template for (constexpr auto annotation : annotations)
+    {
+        constexpr auto type = std::meta::type_of(annotation);
+
+        // The enum_value is template and real type is dependent on value length.
+        if constexpr (std::meta::template_of(type) == ^^enum_value)
+        {
+            // Extract size from template parameter and use it to extract annotation object
+            constexpr auto size = std::meta::constant_of(std::meta::template_arguments_of(type)[0]);
+
+            // Only for given tags
+            if constexpr (std::meta::template_arguments_of(type)[1] == ^^TAG)
+            {
+                // Store annotation object at static storage so it outlive the function call
+                static constexpr auto value = std::meta::extract<enum_value<([:size:]), TAG>>(annotation);
+
+                return value.str();
+            }
+        }
+    }
+
+    // No annotation found, return the enumerator name
+    return std::meta::identifier_of(enumerator);
+}
+
+/* ************************************************************************ */
+
+#endif
+
+/* ************************************************************************ */
+
 /**
  * The default implementation of string-enum conversion.
  *
@@ -43,6 +179,7 @@ template<typename ENUM, typename TAG = tag_default_t>
     requires std::is_enum_v<ENUM>
 struct convertor
 {
+#ifdef __cpp_impl_reflection
     /**
      * Convert enum value to string.
      *
@@ -51,7 +188,54 @@ struct convertor
      * @return the string view representation of the enum value.
      */
     [[nodiscard]]
-    static auto to_string(const ENUM value) noexcept -> std::string_view = delete;
+    static auto to_string(const ENUM value) noexcept -> std::string_view
+        requires(has_generate<ENUM, TAG>())
+    {
+        constexpr static auto enumerators = std::define_static_array(enumerators_of(^^ENUM));
+
+        template for (constexpr auto enumerator : enumerators)
+        {
+            if (value == [:enumerator:])
+                return get_enumeration_value<enumerator, TAG>();
+        }
+
+        return "?";
+    }
+#endif
+
+    /**
+     * Convert enum value to string.
+     *
+     * @param value the enum value to convert
+     *
+     * @return the string view representation of the enum value.
+     */
+    [[nodiscard]]
+    static auto to_string(ENUM value) noexcept -> std::string_view = delete;
+
+#ifdef __cpp_impl_reflection
+    /**
+     * Try to convert string to enum value.
+     *
+     * @param value the string value to convert
+     *
+     * @return the enum value if conversion is successful, otherwise std::nullopt
+     */
+    [[nodiscard]]
+    static auto try_from_string(const std::string_view value) noexcept -> std::optional<ENUM>
+        requires(has_generate<ENUM, TAG>())
+    {
+        constexpr static auto enumerators = std::define_static_array(enumerators_of(^^ENUM));
+
+        template for (constexpr auto enumerator : enumerators)
+        {
+            if (value == get_enumeration_value<enumerator, TAG>())
+                return [:enumerator:];
+        }
+
+        return std::nullopt;
+    }
+#endif
 
     /**
      * Try to convert string to enum value.

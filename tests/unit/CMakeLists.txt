@@ -15,6 +15,7 @@ target_compile_features(tests_unit PUBLIC cxx_std_20)
 target_sources(tests_unit
         PRIVATE
         string-enum.test.cpp
+        string-enum.refl.test.cpp
         format.test.cpp
 )
 

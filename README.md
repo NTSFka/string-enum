@@ -136,6 +136,57 @@ const auto val = ntsfka::string_enum::from_string<my_enum>("value1", tag_json);
 const auto str = ntsfka::string_enum::to_string(val, tag_json);
 ```
 
+### C++26 reflection support
+
+When the compiler supports C++26 reflection (`#ifdef __cpp_impl_reflection`), additional symbols are available that allow generating automatically the
+conversion functions. The most important is annotation `generate<>` that will generate the default implementation for
+the annotated enum. The annotation is a template that accepts a tag object (default is `tag_default`).
+
+The generated implemenation uses series of `if`s.
+
+```c++
+// For default tag
+enum class [[=ntsfka::string_enum::generate<>]] my_enum {
+    value1,
+    value2,
+};
+
+// For custom tag
+enum class [[=ntsfka::string_enum::generate<custom_tag>]] my_enum {
+    value1,
+    value2,
+};
+```
+
+By default, the string values are the same as the enumeration name. This can be changed by annotation `enum_value`.
+
+```c++
+// For default tag
+enum class [[=ntsfka::string_enum::generate<>]] my_enum {
+    value1 [[=ntsfka::string_enum::enum_value("Value 1")]],
+    value2 [[=ntsfka::string_enum::enum_value("Value 2")]],
+};
+
+// For custom tag
+enum class [[=ntsfka::string_enum::generate<custom_tag>]] my_enum {
+    value1 [[=ntsfka::string_enum::enum_value("Value 1", custom_tag)]],
+    value2 [[=ntsfka::string_enum::enum_value("Value 2", custom_tag)]],
+};
+```
+
+Annotations can be combined in one enum.
+
+```c++
+// Just to simplify the example
+using namespace ntsfka::string_enum;
+
+// For default tag
+enum class [[=generate<>, =generate<custom_tag>]] my_enum {
+    value1 [[=enum_value("Value1"), =enum_value("custom value 1", custom_tag)]],
+    value2 [[=enum_value("Value2"), =enum_value("custom value 2", custom_tag)]],
+};
+```
+
 ## License
 
 MIT
