@@ -139,11 +139,10 @@ TEST_CASE("string_enum ostream", "[unit]")
 TEST_CASE("string_enum ostream invalid", "[unit]")
 {
     auto oss = std::ostringstream();
-    oss << static_cast<test_enum1>(12);
+    oss << static_cast<test_enum1>(12); // NOLINT
 
     CHECK(oss.str() == "?");
 }
-
 
 /* ************************************************************************ */
 
@@ -200,7 +199,7 @@ TEST_CASE("string_enum ostream - print tag", "[unit]")
 TEST_CASE("string_enum ostream invalid - print tag", "[unit]")
 {
     auto oss = std::ostringstream();
-    oss << static_cast<test_enum2>(12);
+    oss << static_cast<test_enum2>(12); // NOLINT
 
     CHECK(oss.str() == "?");
 }
