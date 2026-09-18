@@ -1,13 +1,13 @@
 name: C++ linters
 
-on: [push, pull_request]
+on: [push]
 
 jobs:
   cpp-linter:
     runs-on: ubuntu-26.04
     env:
-      CC: clang-22
-      CXX: clang++-22
+      CC: clang-20
+      CXX: clang++-20
     steps:
       - uses: actions/checkout@v7
 
@@ -21,7 +21,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          version: '22'
+          version: '20'
           files-changed-only: false
           style: 'file'
           tidy-checks: ''
