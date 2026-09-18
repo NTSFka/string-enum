@@ -1,0 +1,33 @@
+name: C++ linters
+
+on: [push, pull_request]
+
+jobs:
+  cpp-linter:
+    runs-on: ubuntu-latest
+    env:
+      CC: clang-22
+      CXX: clang++-22
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Configure CMake
+        working-directory: ${{ github.workspace }}
+        run: cmake --preset debug -DCMAKE_EXPORT_COMPILE_COMMANDS=On
+
+      - uses: cpp-linter/cpp-linter-action@main
+        id: linter
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          version: '22'
+          files-changed-only: false
+          style: 'file'
+          tidy-checks: ''
+          database: 'build/debug'
+          ignore: '.github|build'
+
+      - name: Fail fast?!
+        if: steps.linter.outputs.clang-tidy-checks-failed > 0
+        run: exit 1
