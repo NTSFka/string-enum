@@ -3,33 +3,34 @@
 # Copyright (c) 2026 Jiri Fatka                                            #
 # ######################################################################## #
 
-add_library(string-enum STATIC)
-add_library(ntsfka::string-enum ALIAS string-enum)
+add_library(string-enum_headers INTERFACE)
+target_compile_features(string-enum_headers INTERFACE cxx_std_20)
 
-target_compile_features(string-enum PUBLIC cxx_std_20)
-
-
-target_sources(string-enum
+target_sources(string-enum_headers
         PUBLIC FILE_SET HEADERS BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include/ntsfka FILES
         ${CMAKE_CURRENT_SOURCE_DIR}/include/ntsfka/string-enum.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/include/ntsfka/string-enum/string-enum.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/include/ntsfka/string-enum/format.hpp
 )
 
+target_include_directories(string-enum_headers
+        INTERFACE "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+        INTERFACE "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+)
+
 if (STRING_ENUM_CXX_MODULES)
-    target_sources(string-enum
+    add_library(string-enum_modules)
+    target_link_libraries(string-enum_modules PUBLIC string-enum_headers)
+
+    target_sources(string-enum_modules
             PUBLIC FILE_SET CXX_MODULES FILES
             string-enum.cppm
     )
-else ()
-    # Without modules its only a header-only library and CMake is not able to determine linker language
-    set_target_properties(string-enum PROPERTIES LINKER_LANGUAGE CXX)
-endif ()
 
-target_include_directories(string-enum
-        PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-        PUBLIC "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
-)
+    add_library(ntsfka::string-enum ALIAS string-enum_modules)
+else ()
+    add_library(ntsfka::string-enum ALIAS string-enum_headers)
+endif ()
 
 add_coverage(string-enum)
 
