@@ -21,7 +21,7 @@ include(Coverage)
 # ######################################################################## #
 
 # Allow to disable export of library's C++ modules if compiler support is broken
-option(ENUM_STRING_CXX_MODULES "Enable or disable support of C++ modules" On)
+option(STRING_ENUM_CXX_MODULES "Enable or disable support of C++ modules" On)
 
 # ######################################################################## #
 
@@ -39,16 +39,23 @@ endif ()
 # ######################################################################## #
 
 include(GNUInstallDirs)
-install(TARGETS string-enum
+install(TARGETS string-enum_headers
         EXPORT string-enum-targets
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
         INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
         FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-        FILE_SET CXX_MODULES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-        CXX_MODULES_BMI DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
+
+if (STRING_ENUM_CXX_MODULES)
+    install(TARGETS string-enum_modules
+            EXPORT string-enum-targets
+            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+            INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+            FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+            FILE_SET CXX_MODULES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+            CXX_MODULES_BMI DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    )
+endif ()
 
 install(EXPORT string-enum-targets
         FILE string-enum-targets.cmake
