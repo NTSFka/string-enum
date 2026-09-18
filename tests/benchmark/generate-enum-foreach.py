@@ -12,14 +12,10 @@ def main(variants: list[int]) -> None:
         file.write("#ifndef NTSFKA_ENUM_STRING_ENUM_FOREACH_HPP\n")
         file.write("#define NTSFKA_ENUM_STRING_ENUM_FOREACH_HPP\n")
         file.write("\n")
-        file.write("// NOLINTBEGIN\n")
-        file.write("\n")
 
         for variant in variants:
             _build_for(file, variant)
 
-        file.write("\n")
-        file.write("// NOLINTEND\n")
         file.write("\n")
         file.write("#endif // NTSFKA_ENUM_STRING_ENUM_FOREACH_HPP\n")
 

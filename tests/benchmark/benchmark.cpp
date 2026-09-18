@@ -122,6 +122,7 @@ constexpr auto hash(const std::string_view range) noexcept -> INTEGER
 
 /* ************************************************************************ */
 
+// NOLINTNEXTLINE
 enum class test_enum
 {
 #define ENUM_IMPL(type, name, value) name = value,
@@ -235,8 +236,8 @@ struct ntsfka::string_enum::convertor<test_enum, tag_map_t>
     [[nodiscard]]
     static auto to_string(const test_enum value) -> std::string_view
     {
-        if (const auto it = mappingTo.find(value); it != mappingTo.end())
-            return it->second;
+        if (const auto rec = mappingTo.find(value); rec != mappingTo.end())
+            return rec->second;
 
         return "?";
     }
@@ -244,8 +245,8 @@ struct ntsfka::string_enum::convertor<test_enum, tag_map_t>
     [[nodiscard]]
     static auto try_from_string(const std::string_view value) -> std::optional<test_enum>
     {
-        if (const auto it = mappingFrom.find(value); it != mappingFrom.end())
-            return it->second;
+        if (const auto rec = mappingFrom.find(value); rec != mappingFrom.end())
+            return rec->second;
 
         return std::nullopt;
     }
@@ -305,9 +306,10 @@ namespace {
 class CsvReporter : public Catch::StreamingReporterBase
 {
 public:
-    using StreamingReporterBase::StreamingReporterBase;
+    using StreamingReporterBase::StreamingReporterBase; // NOLINT
 
-    static std::string getDescription()
+    [[maybe_unused]]
+    static auto getDescription() -> std::string // NOLINT
     {
         return "CSV benchmark reporter";
     }

@@ -2,7 +2,7 @@
 #Checks: '-*,clang-diagnostic-*,clang-analyzer-*,cppcoreguidelines-*,modernize-*,performance-*,portability-*,readability-*'
 Checks: >
   -*,
-  cppcoreguidelines-*,
+  cppcoreguidelines-*,-cppcoreguidelines-macro-usage,
   modernize-*,
   portability-*,
   performance-*,
