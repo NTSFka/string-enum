@@ -19,7 +19,7 @@ target_sources(tests_unit
         format.test.cpp
 )
 
-if (ENUM_STRING_CXX_MODULES)
+if (STRING_ENUM_CXX_MODULES)
     target_sources(tests_unit
             PRIVATE
             cxxmodule.test.cpp
