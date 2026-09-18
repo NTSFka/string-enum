@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
   cpp-linter:
-    runs-on: ubuntu-26
+    runs-on: ubuntu-26.04
     env:
       CC: clang-22
       CXX: clang++-22
