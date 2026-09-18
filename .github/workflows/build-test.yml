@@ -76,14 +76,19 @@ jobs:
             cxx: "cl"
 
           # MacOS Clang
-          - name: "MacOS 26: Clang 18"
+          - name: "MacOS 26: Clang"
             os: macos
             os-image: macos-26
             cc: clang
             cxx: clang++
+            cmake-flags: -DSTRING_ENUM_CXX_MODULES=Off
 
     steps:
     - uses: actions/checkout@v7
+
+    - name: Prepare environment (Windows)
+      uses: ilammy/msvc-dev-cmd@v1
+      if: matrix.os == 'windows'
 
     - name: Configure CMake
       working-directory: ${{ github.workspace }}

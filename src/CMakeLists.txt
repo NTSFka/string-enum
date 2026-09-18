@@ -15,7 +15,7 @@ target_sources(string-enum
         ${CMAKE_CURRENT_SOURCE_DIR}/include/ntsfka/string-enum/format.hpp
 )
 
-if (ENUM_STRING_CXX_MODULES)
+if (STRING_ENUM_CXX_MODULES)
     target_sources(string-enum
             PUBLIC FILE_SET CXX_MODULES FILES
             string-enum.cppm

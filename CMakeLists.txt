@@ -21,7 +21,7 @@ include(Coverage)
 # ######################################################################## #
 
 # Allow to disable export of library's C++ modules if compiler support is broken
-option(ENUM_STRING_CXX_MODULES "Enable or disable support of C++ modules" On)
+option(STRING_ENUM_CXX_MODULES "Enable or disable support of C++ modules" On)
 
 # ######################################################################## #
 
