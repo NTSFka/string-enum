@@ -8,6 +8,7 @@ add_library(ntsfka::string-enum ALIAS string-enum)
 
 target_compile_features(string-enum PUBLIC cxx_std_20)
 
+
 target_sources(string-enum
         PUBLIC FILE_SET HEADERS BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include/ntsfka FILES
         ${CMAKE_CURRENT_SOURCE_DIR}/include/ntsfka/string-enum.hpp
@@ -20,6 +21,9 @@ if (STRING_ENUM_CXX_MODULES)
             PUBLIC FILE_SET CXX_MODULES FILES
             string-enum.cppm
     )
+else ()
+    # Without modules its only a header-only library and CMake is not able to determine linker language
+    set_target_properties(string-enum PROPERTIES LINKER_LANGUAGE CXX)
 endif ()
 
 target_include_directories(string-enum
